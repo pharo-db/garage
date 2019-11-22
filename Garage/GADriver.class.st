@@ -15,7 +15,7 @@ Class {
 	#classVars : [
 		'Drivers'
 	],
-	#category : 'Garage-Driver'
+	#category : #'Garage-Driver'
 }
 
 { #category : #accessing }
@@ -120,6 +120,11 @@ GADriver >> beginTransaction [
 GADriver >> close [
 	"Closes the current connection"
 	self subclassResponsibility
+]
+
+{ #category : #schema }
+GADriver >> columnsForTable: aTableName [
+	self subclassResponsibility 
 ]
 
 { #category : #transactions }
@@ -318,6 +323,11 @@ GADriver >> supportsRetrievingGeneratedKeys [
 
 	"Tests if the current database driver supports retrieving auto generated keys/ids without an extra query"
 	^ false
+]
+
+{ #category : #schema }
+GADriver >> tables [
+	self subclassResponsibility 
 ]
 
 { #category : #finalization }
