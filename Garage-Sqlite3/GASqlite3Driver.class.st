@@ -2,9 +2,7 @@ Class {
 	#name : #GASqlite3Driver,
 	#superclass : #GADriver,
 	#instVars : [
-		'database',
-		'handle',
-		'isOpen'
+		'connection',
 	],
 	#category : 'Garage-Sqlite3'
 }
@@ -20,7 +18,7 @@ GASqlite3Driver class >> fromConnectionString: aConnectionString [
 
 	^ self new
 		connectionString: aConnectionString;
-		database: (aConnectionString host = 'memory' ifTrue: [ ':memory:' ] ifFalse: [ (aConnectionString databasePath) urlDecoded ]);
+		connection: (SQLite3Connection on:(aConnectionString host = 'memory' ifTrue: [ ':memory:' ] ifFalse: [ (aConnectionString databasePath) urlDecoded ]));
 		yourself
 ]
 
@@ -51,69 +49,49 @@ GASqlite3Driver >> backend [
 { #category : #public }
 GASqlite3Driver >> basicExecute: anSQLText [
 
-	^ GASqlite3FFI current execute: anSQLText on: handle
+	^ connection basicExecute: anSQLText
 ]
 
 { #category : #transactions }
 GASqlite3Driver >> beginTransaction [
 
-	^ self basicExecute: 'begin'
+	^ connection beginTransaction
 ]
 
 { #category : #connection }
 GASqlite3Driver >> close [
 
-	handle isNil ifFalse: [ GASqlite3FFI current close: handle ].
-	self unregister.
-	handle := nil.
-	isOpen := false
+	^connection close
 ]
 
 { #category : #transactions }
 GASqlite3Driver >> commitTransaction [
 
-	^ self basicExecute: 'commit'
+	^ connection commitTransaction
 ]
 
 { #category : #connection }
 GASqlite3Driver >> connect [
 	
-	((GASqlite3FFI current open: database via: handle) = 0) 
-		ifTrue: [ 
-			isOpen := true.
-			self register.
-			^ self ]
-		ifFalse: [
-			| err |
-			err := GASqlite3FFI current apiErrorMessage: handle.
-			GASqlite3FFI current apiClose: handle.
-			GASqlite3Error signal: err ]
+	^connection open
 ]
 
 { #category : #query }
-GASqlite3Driver >> createStatement [
-
-	^ GASqlite3Statement new connection: self; yourself
-]
-
-{ #category : #query }
-GASqlite3Driver >> createStatement: aString [ 
+GASqlite3Driver >> prepare: aString [ 
 	
-	^ self createStatement
-		statementString: aString;
-		yourself
+	^connection prepare: aString
 ]
 
 { #category : #accessing }
 GASqlite3Driver >> database [
 
-	^ database
+	^connection filename
 ]
 
 { #category : #accessing }
-GASqlite3Driver >> database: aDatabase [
+GASqlite3Driver >> connection: aSQLite3Connection [
 	
-	database := aDatabase
+	connection := aSQLite3Connection
 ]
 
 { #category : #transactions }
@@ -125,51 +103,37 @@ GASqlite3Driver >> defaultValueAutoCommit [
 { #category : #query }
 GASqlite3Driver >> execute: aQuery [
 
-	^ self execute: aQuery with: #()
+	^ connection execute: aQuery
 ]
 
 { #category : #query }
-GASqlite3Driver >> execute: aQuery with: anObject [
+GASqlite3Driver >> execute: aQuery with: anArray [
 
-	^ GASqlite3ResultSet new execute: aQuery with: anObject on: self
+	^ connection execute: aQuery with: anArray
 ]
 
 { #category : #finalization }
 GASqlite3Driver >> finalize [
 
-	self isConnected ifTrue: [ self close ].
-]
-
-{ #category : #accessing }
-GASqlite3Driver >> handle [
-
-	^ handle
+	connection isOpen ifTrue: [connection close].
 ]
 
 { #category : #transactions }
 GASqlite3Driver >> hasAutoCommit [
 	
-	^ (GASqlite3FFI current getAutoCommit: self handle) == 1
-]
-
-{ #category : #'initialize-release' }
-GASqlite3Driver >> initialize [
-	super initialize.
-
-	handle := GASQLite3DatabaseExternalObject new.
-	isOpen := false.
+	^ connection getAutoCommit
 ]
 
 { #category : #testing }
 GASqlite3Driver >> isConnected [
 
-	^ handle isNotNil and: [ isOpen ]
+	^ connection isNotNil and: [ connection isOpen ]
 ]
 
 { #category : #testing }
 GASqlite3Driver >> isMemory [
 	
-	^ self database = ':memory:'
+	^ self connection filename = ':memory:'
 ]
 
 { #category : #'test-support' }
@@ -184,20 +148,10 @@ GASqlite3Driver >> notBoundArgumentsFail [
 	^ false
 ]
 
-{ #category : #query }
-GASqlite3Driver >> prepare: anSQLText [ 
-	| s |
-	
-	s := self createStatement.
-	s statementString: anSQLText.
-	s prepare.
-	^ s
-]
-
 { #category : #transactions }
 GASqlite3Driver >> rollbackTransaction [
 
-	^ self basicExecute: 'rollback'
+	^ connection rollbackTransaction
 ]
 
 { #category : #testing }
@@ -209,7 +163,7 @@ GASqlite3Driver >> supportsAutomaticQueryEncoding [
 { #category : #testing }
 GASqlite3Driver >> supportsCursoredFetch [
 	
-	^ false
+	^ true
 ]
 
 { #category : #testing }

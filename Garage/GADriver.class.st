@@ -153,14 +153,7 @@ GADriver >> connectionString: aGAConnectionString [
 ]
 
 { #category : #statement }
-GADriver >> createStatement [
-	
-	"Creates an empty statement object"
-	self subclassResponsibility
-]
-
-{ #category : #statement }
-GADriver >> createStatement: aSQLString [
+GADriver >> prepare: aSQLString [
 	
 	"Creates a statement object from a sql query"
 	self subclassResponsibility
