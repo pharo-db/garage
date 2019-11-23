@@ -33,3 +33,11 @@ BaselineOfGarage >> baseline: spec [
 			group: 'postgresV2' with: #('Garage-Postgres' ) ].
 
 ]
+
+{ #category : #baselines }
+BaselineOfGarage >> project [
+	^ super project
+		loadType: #atomic;
+		yourself
+]
+
