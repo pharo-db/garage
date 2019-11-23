@@ -2,7 +2,7 @@ Class {
 	#name : #GASqlite3Driver,
 	#superclass : #GADriver,
 	#instVars : [
-		'connection',
+		'connection'
 	],
 	#category : 'Garage-Sqlite3'
 }
