@@ -1,7 +1,7 @@
 Class {
 	#name : #BaselineOfGarage,
 	#superclass : #BaselineOf,
-	#category : 'BaselineOfGarage'
+	#category : #BaselineOfGarage
 }
 
 { #category : #baselines }
@@ -12,6 +12,8 @@ BaselineOfGarage >> baseline: spec [
 		spec blessing: #'baseline'.
 		spec baseline: 'Pharo-SQLite3' 
 					with: [ spec repository: 'github://pharo-rdbms/Pharo-SQLite3:master/'].
+		spec baseline: 'Pharo-MySQL' 
+					with: [ spec repository: 'github://pharp-rdbms/Pharo-MySQL:master/'].
 		spec baseline: 'P3' 
 					with: [ spec repository: 'github://svenvc/P3'].
 		spec 
@@ -22,8 +24,8 @@ BaselineOfGarage >> baseline: spec [
 					repository: 'http://smalltalkhub.com/mc/PharoExtras/JSON/main/' ].
 		spec 
 			package: 'Garage';
-			package: 'Garage-Mysql' with: [ spec requires: #('Garage' ) ];
-			package: 'Garage-Sqlite3' with: [spec requires: #('Garage' 'Pharo-SQLite3')];
+			package: 'Garage-MySQL' with: [ spec requires: #('Garage' 'Pharo-MySQL') ];
+			package: 'Garage-SQLite3' with: [spec requires: #('Garage' 'Pharo-SQLite3')];
 			package: 'Garage-Postgres' with: [spec requires: #('Garage' 'JSON' )].
 		spec 
 			group: 'default' with: #('ALL' );
@@ -40,4 +42,3 @@ BaselineOfGarage >> project [
 		loadType: #atomic;
 		yourself
 ]
-
